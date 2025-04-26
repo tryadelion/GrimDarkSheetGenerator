@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, colorchooser
+from PIL import Image, ImageTk, ImageFont
 import os
 import json
 
@@ -18,6 +19,9 @@ DARK_BG = "#222222"
 MID_BG = "#333333"
 LIGHT_TEXT = "#eeeeee"
 
+GOTHIC_NUMERALS = [str(i) for i in range(1, 11)]
+IMPERIAL_NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
+
 class IconCell(tk.Frame):
     def __init__(self, master, row, col, *args, **kwargs):
         super().__init__(master, width=CELL_SIZE, height=CELL_SIZE, bg=DARK_BG, *args, **kwargs)
@@ -25,29 +29,37 @@ class IconCell(tk.Frame):
         self.row = row
         self.col = col
         self.content = None
-        self.color = LIGHT_TEXT
+        self.font = ("Arial", 12, "bold")
 
         self.inner_frame = tk.Frame(self, bg=MID_BG)
-        self.inner_frame.pack(expand=True, fill="both", padx=3, pady=3)
-        self.inner_frame.grid_propagate(False)
+        self.inner_frame.place(relx=0, rely=0, relwidth=1, relheight=1)
 
-        self.canvas = tk.Canvas(self.inner_frame, width=CELL_SIZE-6, height=CELL_SIZE-6, highlightthickness=0, bg=MID_BG)
-        self.canvas.pack(expand=True, fill="both")
+        self.canvas = tk.Canvas(self.inner_frame, width=CELL_SIZE-6, height=CELL_SIZE-6,
+                                highlightthickness=0, bg=MID_BG)
+        self.canvas.place(x=3, y=3)
 
     def set_icon(self, image):
         self.content = image
+        self.inner_frame.configure(bg=DARK_BG)
+        self.canvas.configure(bg=DARK_BG)
         self.canvas.delete("all")
-        self.canvas.create_image((CELL_SIZE-6)//2, (CELL_SIZE-6)//2, anchor="center", image=image)
-        self.canvas.image = image
+        img = image
+        if image.width() > CELL_SIZE-6 or image.height() > CELL_SIZE-6:
+            factor = max(image.width()/(CELL_SIZE-6), image.height()/(CELL_SIZE-6))
+            img = image._PhotoImage__photo.subsample(int(factor))
+        self.canvas.create_image((CELL_SIZE-6)//2, (CELL_SIZE-6)//2,
+                                 image=img, anchor="center")
+        self.canvas.image = img
 
-    def set_text(self, text, font):
+    def set_text(self, text, font=None):
         self.content = text
+        if font:
+            self.font = font
+        self.inner_frame.configure(bg=MID_BG)
+        self.canvas.configure(bg=MID_BG)
         self.canvas.delete("all")
-        self.canvas.create_text((CELL_SIZE-6)//2, (CELL_SIZE-6)//2, text=text, font=font, fill=LIGHT_TEXT)
-
-    def clear(self):
-        self.content = None
-        self.canvas.delete("all")
+        self.canvas.create_text((CELL_SIZE-6)//2, (CELL_SIZE-6)//2,
+                                text=text, font=self.font, fill=LIGHT_TEXT)
 
     def highlight(self, color=DEFAULT_HIGHLIGHT_COLOR):
         self.configure(bg=color)
@@ -55,67 +67,90 @@ class IconCell(tk.Frame):
     def unhighlight(self):
         self.configure(bg=DARK_BG)
 
+class FontPickerDialog(tk.Toplevel):
+    def __init__(self, master, section, row):
+        super().__init__(master)
+        self.title(f"Pick Font: {section} Row {row+1}")
+        self.configure(bg=DARK_BG)
+        self.section, self.row = section, row
+        fonts = [f for f in os.listdir(FONT_FOLDER) if f.lower().endswith(('.ttf','.otf'))]
+        self.var = tk.StringVar(value=fonts)
+        lb = tk.Listbox(self, listvariable=self.var, bg=DARK_BG, fg=LIGHT_TEXT,
+                        selectbackground=DEFAULT_HIGHLIGHT_COLOR)
+        lb.pack(fill='both', expand=True, padx=10, pady=10)
+        self.listbox = lb
+        btnf = tk.Frame(self, bg=DARK_BG)
+        btnf.pack(pady=5)
+        tk.Button(btnf, text="Cancel", command=self.destroy,
+                  bg=MID_BG, fg=LIGHT_TEXT, relief="flat").pack(side="left", padx=5)
+        tk.Button(btnf, text="Apply", command=self.apply,
+                  bg=MID_BG, fg=LIGHT_TEXT, relief="flat").pack(side="right", padx=5)
+
+    def apply(self):
+        sel = self.listbox.curselection()
+        if not sel: return
+        fname = self.var.get()[sel[0]]
+        path = os.path.join(FONT_FOLDER, fname)
+        try:
+            pil_font = ImageFont.truetype(path, size=12)
+            family = pil_font.getname()[0]
+        except Exception:
+            family = os.path.splitext(fname)[0]
+        new_font = (family, 12, 'bold')
+        for c in range(10):
+            cell = self.master.cells.get((self.section, self.row, c))
+            if cell and cell.content is not None:
+                cell.set_text(cell.content, font=new_font)
+        self.destroy()
+
 class IconGridApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Icon Grid Editor")
         self.geometry(f"{APP_WIDTH}x{APP_HEIGHT}")
         self.configure(bg=DARK_BG)
-
-        self.selected_cell = None
         self.cells = {}
+        mf = tk.Frame(self, bg=DARK_BG)
+        mf.pack(fill='both', expand=True)
+        mf.grid_rowconfigure(0,weight=1); mf.grid_rowconfigure(1,weight=1)
+        mf.grid_columnconfigure(0,weight=1); mf.grid_columnconfigure(1,weight=1)
+        self.create_section(mf, "Left Shoulder Pad",0,0)
+        self.create_section(mf, "Right Shoulder Pad",0,1)
+        self.create_section(mf, "Gothic Numerals",1,0)
+        self.create_section(mf, "Imperial Numerals",1,1)
+        self.prefill_numerals()
 
-        self.main_frame = tk.Frame(self, bg=DARK_BG)
-        self.main_frame.pack(fill="both", expand=True)
-        self.main_frame.grid_rowconfigure((0, 1), weight=1)
-        self.main_frame.grid_columnconfigure((0, 1), weight=1)
+    def create_section(self, parent, title, r, c):
+        f = tk.Frame(parent, bg=DARK_BG)
+        f.grid(row=r, column=c, sticky='nsew', padx=5, pady=5)
+        tk.Label(f,text=title,font=("Arial",18,"bold"),bg=DARK_BG,fg=LIGHT_TEXT).pack(pady=5)
+        grid = tk.Frame(f, bg=DARK_BG)
+        grid.pack(fill='both', expand=True)
+        self.create_grid(grid, title)
 
-        self.top_left_frame = self.create_section("Left Shoulder Pad", 0, 0)
-        self.top_right_frame = self.create_section("Right Shoulder Pad", 0, 1)
-        self.bottom_left_frame = self.create_section("Gothic Numerals", 1, 0)
-        self.bottom_right_frame = self.create_section("Imperial Numerals", 1, 1)
-
-    def create_section(self, title, row, column):
-        frame = tk.Frame(self.main_frame, bg=DARK_BG)
-        frame.grid(row=row, column=column, sticky="nsew", padx=5, pady=5)
-        frame.grid_rowconfigure(1, weight=1)
-        frame.grid_columnconfigure(0, weight=1)
-
-        header = tk.Label(frame, text=title, font=("Arial", 18, "bold"), bg=DARK_BG, fg=LIGHT_TEXT)
-        header.grid(row=0, column=0, pady=5)
-
-        grid_container = tk.Frame(frame, bg=DARK_BG)
-        grid_container.grid(row=1, column=0, sticky="nsew")
-        self.create_grid(grid_container, title)
-
-        return frame
-
-    def create_grid(self, parent, section_title):
+    def create_grid(self, parent, section):
         for r in range(5):
-            parent.grid_rowconfigure(r, weight=1)
             for c in range(11):
-                parent.grid_columnconfigure(c, weight=1)
-                if c == 0:
-                    btn = tk.Button(parent, text="Set", width=4, command=lambda s=section_title, r=r: self.set_row_action(s, r),
-                                    bg=MID_BG, fg=LIGHT_TEXT, activebackground="#555555", relief="flat", highlightbackground=DARK_BG)
-                    btn.grid(row=r, column=c, padx=1, pady=1)
+                if c==0:
+                    cmd = (lambda s=section, row=r: FontPickerDialog(self,s,row)) if section in ("Gothic Numerals","Imperial Numerals") else (lambda s=section,row=r: IconPickerDialog(self,s,row))
+                    tk.Button(parent,text="Set",width=4,command=cmd,bg=MID_BG,fg=LIGHT_TEXT,relief="flat").grid(row=r,column=c,padx=1,pady=1)
                 else:
-                    cell = IconCell(parent, r, c-1)
-                    cell.grid(row=r, column=c, padx=1, pady=1, sticky="nsew")
-                    cell.bind("<Button-1>", lambda e, s=section_title, r=r, c=c-1: self.select_cell(s, r, c))
-                    cell.canvas.bind("<Button-1>", lambda e, s=section_title, r=r, c=c-1: self.select_cell(s, r, c))
-                    self.cells[(section_title, r, c-1)] = cell
+                    cell=IconCell(parent,r,c-1)
+                    cell.grid(row=r,column=c,padx=1,pady=1)
+                    cell.bind("<Button-1>",lambda e,s=section,row=r,col=c-1:self.select_cell(s,row,col))
+                    cell.canvas.bind("<Button-1>",lambda e,s=section,row=r,col=c-1:self.select_cell(s,row,col))
+                    self.cells[(section,r,c-1)] = cell
 
-    def select_cell(self, section, row, col):
-        if self.selected_cell:
-            self.selected_cell.unhighlight()
-        key = (section, row, col)
-        if key in self.cells:
-            self.selected_cell = self.cells[key]
-            self.selected_cell.highlight()
+    def select_cell(self, section,row,col):
+        if hasattr(self,'sel_cell') and self.sel_cell:
+            self.sel_cell.unhighlight()
+        key=(section,row,col)
+        cell=self.cells.get(key)
+        if cell: cell.highlight(); self.sel_cell=cell
 
-    def set_row_action(self, section, row):
-        IconPickerDialog(self, section, row)
+    def prefill_numerals(self):
+        for idx,n in enumerate(GOTHIC_NUMERALS): r,c=divmod(idx,10); self.cells[("Gothic Numerals",r,c)].set_text(n)
+        for idx,n in enumerate(IMPERIAL_NUMERALS): r,c=divmod(idx,10); self.cells[("Imperial Numerals",r,c)].set_text(n)
 
 class IconPickerDialog(tk.Toplevel):
     def __init__(self, master, section, row):
@@ -170,25 +205,32 @@ class IconPickerDialog(tk.Toplevel):
         self.load_icons()
 
     def load_icons(self):
-        for filename in os.listdir(ICON_FOLDER):
-            print(f"[LOG] Found file: {filename}")
-            if filename.lower().endswith((".png", ".gif")):
-                path = os.path.join(ICON_FOLDER, filename)
-                try:
-                    tk_img = tk.PhotoImage(file=path)
-                    self.icon_images.append(tk_img)
-                    btn = tk.Button(self.icon_frame, image=tk_img, text="", command=lambda p=path: self.select_icon(p),
-                                    bg=DARK_BG, bd=0, relief="flat", highlightthickness=0)
-                    btn.pack(padx=5, pady=5)
-                    print(f"[LOG] Displaying icon button for: {filename}")
-                except Exception as e:
-                    print(f"[ERROR] Failed to load {filename}: {e}")
+        files = [f for f in os.listdir(ICON_FOLDER) if f.lower().endswith((".png", ".gif"))]
+        for idx, filename in enumerate(files):
+            path = os.path.join(ICON_FOLDER, filename)
+            try:
+                img = Image.open(path)
+                img.thumbnail((60, 60))
+                tk_img = ImageTk.PhotoImage(img)
+                self.icon_images.append(tk_img)
+                row, col = divmod(idx, 5)
+                btn = tk.Button(self.icon_frame, image=tk_img, text="", command=lambda p=path: self.select_icon(p),
+                                bg=DARK_BG, bd=0, relief="flat", highlightthickness=0)
+                btn.grid(row=row, column=col, padx=5, pady=5)
+            except Exception as e:
+                print(f"[ERROR] Failed to load {filename}: {e}")
         self.scroll_canvas.update_idletasks()
 
     def select_icon(self, path):
         self.selected_path = path
-        tk_img = tk.PhotoImage(file=path)
-        self.selected_image = tk_img
+        img = Image.open(path)
+
+        preview_width = self.preview_frame.winfo_width() or 300
+        preview_height = self.preview_frame.winfo_height() or 400
+
+        img.thumbnail((preview_width, preview_height))
+        self.selected_image = ImageTk.PhotoImage(img)
+
         self.preview_label.configure(image=self.selected_image, text="")
         self.preview_label.image = self.selected_image
 
