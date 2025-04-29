@@ -1,12 +1,14 @@
 import tkinter as tk
-from tkinter import filedialog, colorchooser
+from tkinter import filedialog, messagebox
+from tkcolorpicker import askcolor
 from PIL import Image, ImageTk, ImageFont
-import os
+import tkinter.font as tkfont
+import os, ctypes
 import json
 
 # Basic Config
 APP_WIDTH = 1200
-APP_HEIGHT = 800
+APP_HEIGHT = 900
 CELL_SIZE = 48
 
 ICON_FOLDER = "icons"
@@ -58,8 +60,20 @@ class IconCell(tk.Frame):
         self.inner_frame.configure(bg=MID_BG)
         self.canvas.configure(bg=MID_BG)
         self.canvas.delete("all")
-        self.canvas.create_text((CELL_SIZE-6)//2, (CELL_SIZE-6)//2,
-                                text=text, font=self.font, fill=LIGHT_TEXT)
+
+        temp_font = tkfont.Font(font=self.font)
+
+        x = (CELL_SIZE - 6) // 2
+        y = (CELL_SIZE - 6) // 2
+
+        self.canvas.create_text(
+            x,
+            y,
+            text=text,
+            font=self.font,
+            fill=LIGHT_TEXT,
+            anchor="center"
+        )
 
     def highlight(self, color=DEFAULT_HIGHLIGHT_COLOR):
         self.configure(bg=color)
@@ -73,35 +87,161 @@ class FontPickerDialog(tk.Toplevel):
         self.title(f"Pick Font: {section} Row {row+1}")
         self.configure(bg=DARK_BG)
         self.section, self.row = section, row
+        self.selected_index = None
+        self.hover_index = None
+
         fonts = [f for f in os.listdir(FONT_FOLDER) if f.lower().endswith(('.ttf','.otf'))]
-        self.var = tk.StringVar(value=fonts)
-        lb = tk.Listbox(self, listvariable=self.var, bg=DARK_BG, fg=LIGHT_TEXT,
-                        selectbackground=DEFAULT_HIGHLIGHT_COLOR)
-        lb.pack(fill='both', expand=True, padx=10, pady=10)
-        self.listbox = lb
+        self.fonts = fonts
+
+        self.canvas = tk.Canvas(self, bg=DARK_BG, highlightthickness=0)
+        self.canvas.pack(fill='both', expand=True, padx=10, pady=10)
+        self.canvas.bind("<Button-1>", self.on_click)
+        self.canvas.bind("<Motion>", self.on_hover)
+
+        self.draw_font_list()
+
         btnf = tk.Frame(self, bg=DARK_BG)
         btnf.pack(pady=5)
         tk.Button(btnf, text="Cancel", command=self.destroy,
-                  bg=MID_BG, fg=LIGHT_TEXT, relief="flat").pack(side="left", padx=5)
+                bg=MID_BG, fg=LIGHT_TEXT, relief="flat").pack(side="left", padx=5)
+        tk.Button(btnf, text="Apply to All", command=self.apply_to_all,
+                bg=MID_BG, fg=LIGHT_TEXT, relief="flat").pack(side="right", padx=5)
         tk.Button(btnf, text="Apply", command=self.apply,
-                  bg=MID_BG, fg=LIGHT_TEXT, relief="flat").pack(side="right", padx=5)
+                bg=MID_BG, fg=LIGHT_TEXT, relief="flat").pack(side="right", padx=5)
+
+
+    def draw_font_list(self):
+        self.canvas.delete("all")
+        y = 20
+        self.items = []
+
+        for idx, fname in enumerate(self.fonts):
+            display_name = os.path.splitext(fname)[0]
+            path = os.path.join(FONT_FOLDER, fname)
+            try:
+                FR_PRIVATE = 0x10
+                if os.name == 'nt':
+                    ctypes.windll.gdi32.AddFontResourceExW(path, FR_PRIVATE, 0)
+                pil_font = ImageFont.truetype(path, size=16)
+                family = pil_font.getname()[0]
+                font_obj = tkfont.Font(family=family, size=16)
+            except Exception:
+                font_obj = tkfont.Font(family="Arial", size=16)
+
+            color = DEFAULT_HIGHLIGHT_COLOR if idx == self.selected_index else ("#555555" if idx == self.hover_index else LIGHT_TEXT)
+            text_preview = f"{display_name} - IX 3"
+            self.canvas.create_text(30, y, anchor='w', text=text_preview, font=font_obj, fill=color, tags=("font", f"font_{idx}"))
+            self.items.append((y-10, y+20, idx))
+            y += 50
+
+        self.canvas.config(scrollregion=(0,0,500,y))
+
+    def on_click(self, event):
+        for top, bottom, idx in self.items:
+            if top <= event.y <= bottom:
+                self.selected_index = idx
+                break
+        self.draw_font_list()
+
+    def on_hover(self, event):
+        new_hover = None
+        for top, bottom, idx in self.items:
+            if top <= event.y <= bottom:
+                new_hover = idx
+                break
+        if new_hover != self.hover_index:
+            self.hover_index = new_hover
+            self.draw_font_list()
 
     def apply(self):
-        sel = self.listbox.curselection()
-        if not sel: return
-        fname = self.var.get()[sel[0]]
+        if self.selected_index is None:
+            return
+
+        fname = self.fonts[self.selected_index]
         path = os.path.join(FONT_FOLDER, fname)
+
         try:
+            FR_PRIVATE = 0x10
+            if os.name == 'nt':
+                ctypes.windll.gdi32.AddFontResourceExW(path, FR_PRIVATE, 0)
             pil_font = ImageFont.truetype(path, size=12)
             family = pil_font.getname()[0]
+
+            # Only bold Imperial numerals, normal for Gothic
+            if self.section == "Imperial Numerals":
+                new_font = (family, 12, 'bold')
+            else:
+                new_font = (family, 12)
         except Exception:
-            family = os.path.splitext(fname)[0]
-        new_font = (family, 12, 'bold')
+            new_font = ("Arial", 12)
+
         for c in range(10):
-            cell = self.master.cells.get((self.section, self.row, c))
-            if cell and cell.content is not None:
-                cell.set_text(cell.content, font=new_font)
+            key = (self.section, self.row, c)
+            if key in self.master.cells:
+                cell = self.master.cells[key]
+                if isinstance(cell.content, str):
+                    cell.set_text(cell.content, font=new_font)
         self.destroy()
+
+    def apply_to_all(self):
+        if self.selected_index is None:
+            return
+
+        fname = self.fonts[self.selected_index]
+        path = os.path.join(FONT_FOLDER, fname)
+
+        try:
+            FR_PRIVATE = 0x10
+            if os.name == 'nt':
+                ctypes.windll.gdi32.AddFontResourceExW(path, FR_PRIVATE, 0)
+            pil_font = ImageFont.truetype(path, size=12)
+            family = pil_font.getname()[0]
+
+            if self.section == "Imperial Numerals":
+                new_font = (family, 12, "bold")
+            else:
+                new_font = (family, 12)
+        except Exception:
+            new_font = ("Arial", 12)
+
+        for r in range(5):
+            for c in range(10):
+                key = (self.section, r, c)
+                if key in self.master.cells:
+                    cell = self.master.cells[key]
+                    if isinstance(cell.content, str):
+                        cell.set_text(cell.content, font=new_font)
+
+        self.destroy()
+
+
+class Tooltip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tip_window = None
+        widget.bind("<Enter>", self.show_tip)
+        widget.bind("<Leave>", self.hide_tip)
+
+    def show_tip(self, event=None):
+        if self.tip_window or not self.text:
+            return
+        x, y, cx, cy = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 20
+        self.tip_window = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(tw, text=self.text, bg="black", fg="white",
+                         relief="solid", borderwidth=1,
+                         font=("Arial", 10, "normal"))
+        label.pack(ipadx=5, ipady=2)
+
+    def hide_tip(self, event=None):
+        tw = self.tip_window
+        self.tip_window = None
+        if tw:
+            tw.destroy()
 
 class IconGridApp(tk.Tk):
     def __init__(self):
@@ -109,6 +249,20 @@ class IconGridApp(tk.Tk):
         self.title("Icon Grid Editor")
         self.geometry(f"{APP_WIDTH}x{APP_HEIGHT}")
         self.configure(bg=DARK_BG)
+
+        menubar = tk.Menu(self)
+        file_menu = tk.Menu(menubar, tearoff=0)
+
+        file_menu.add_command(label="Load Layout", command=self.load_layout)
+        file_menu.add_command(label="Save Layout", command=self.save_layout)
+        file_menu.add_separator()
+        file_menu.add_command(label="Print", command=self.print_layout)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=self.quit)
+
+        menubar.add_cascade(label="File", menu=file_menu)
+        self.config(menu=menubar)
+
         self.cells = {}
         mf = tk.Frame(self, bg=DARK_BG)
         mf.pack(fill='both', expand=True)
@@ -131,15 +285,60 @@ class IconGridApp(tk.Tk):
     def create_grid(self, parent, section):
         for r in range(5):
             for c in range(11):
-                if c==0:
-                    cmd = (lambda s=section, row=r: FontPickerDialog(self,s,row)) if section in ("Gothic Numerals","Imperial Numerals") else (lambda s=section,row=r: IconPickerDialog(self,s,row))
-                    tk.Button(parent,text="Set",width=4,command=cmd,bg=MID_BG,fg=LIGHT_TEXT,relief="flat").grid(row=r,column=c,padx=1,pady=1)
+                if c == 0:
+                    btn_frame = tk.Frame(parent, bg=DARK_BG)
+                    btn_frame.grid(row=r, column=c, padx=1, pady=1)
+
+                    if section in ("Gothic Numerals", "Imperial Numerals"):
+                        font_btn = tk.Button(
+                            btn_frame, text="𝙵𝙵", width=2, height=1,
+                            command=lambda s=section, row=r: FontPickerDialog(self, s, row),
+                            bg=MID_BG, fg="white", relief="solid", bd=1, highlightthickness=0,
+                            anchor="center", justify="center",
+                            font=("Arial", 14, "bold")
+                        )
+                        font_btn.pack(padx=1, pady=1, fill='both')
+                        self.create_tooltip(font_btn, "Pick Font")
+
+                        color_btn = tk.Button(
+                            btn_frame, text="🎨", width=2, height=1,
+                            command=lambda s=section, row=r: self.pick_color_action(s, row),
+                            bg=MID_BG, fg="white", relief="solid", bd=1, highlightthickness=0,
+                            anchor="center", justify="center",
+                            font=("Arial", 14, "bold")
+                        )
+                        color_btn.pack(padx=1, pady=1, fill='both')
+                        self.create_tooltip(color_btn, "Pick Color")
+
+                    else:
+                        img_btn = tk.Button(
+                            btn_frame, text="     🖼️", width=2, height=1,
+                            command=lambda s=section, row=r: IconPickerDialog(self, s, row),
+                            bg=MID_BG, fg="white", relief="solid", bd=1, highlightthickness=0,
+                            anchor="center", justify="center",
+                            font=("Arial", 14, "bold")
+                        )
+                        img_btn.pack(padx=1, pady=1, fill='both')
+                        self.create_tooltip(img_btn, "Pick Icon")
+
+                        color_btn = tk.Button(
+                            btn_frame, text="🎨", width=2, height=1,
+                            command=lambda s=section, row=r: self.pick_color_action(s, row),
+                            bg=MID_BG, fg="white", relief="solid", bd=1, highlightthickness=0,
+                            anchor="center", justify="center",
+                            font=("Arial", 14, "bold")
+                        )
+                        color_btn.pack(padx=1, pady=1, fill='both')
+                        self.create_tooltip(color_btn, "Pick Color")
                 else:
-                    cell=IconCell(parent,r,c-1)
-                    cell.grid(row=r,column=c,padx=1,pady=1)
-                    cell.bind("<Button-1>",lambda e,s=section,row=r,col=c-1:self.select_cell(s,row,col))
-                    cell.canvas.bind("<Button-1>",lambda e,s=section,row=r,col=c-1:self.select_cell(s,row,col))
-                    self.cells[(section,r,c-1)] = cell
+                    cell = IconCell(parent, r, c-1)
+                    cell.grid(row=r, column=c, padx=1, pady=1)
+                    cell.bind("<Button-1>", lambda e, s=section, row=r, col=c-1: self.select_cell(s, row, col))
+                    cell.canvas.bind("<Button-1>", lambda e, s=section, row=r, col=c-1: self.select_cell(s, row, col))
+                    self.cells[(section, r, c-1)] = cell
+
+    def create_tooltip(self, widget, text):
+        Tooltip(widget, text)
 
     def select_cell(self, section,row,col):
         if hasattr(self,'sel_cell') and self.sel_cell:
@@ -149,8 +348,109 @@ class IconGridApp(tk.Tk):
         if cell: cell.highlight(); self.sel_cell=cell
 
     def prefill_numerals(self):
-        for idx,n in enumerate(GOTHIC_NUMERALS): r,c=divmod(idx,10); self.cells[("Gothic Numerals",r,c)].set_text(n)
-        for idx,n in enumerate(IMPERIAL_NUMERALS): r,c=divmod(idx,10); self.cells[("Imperial Numerals",r,c)].set_text(n)
+        for r in range(5):
+            for c in range(10):
+                gothic_key = ("Gothic Numerals", r, c)
+                imperial_key = ("Imperial Numerals", r, c)
+                if gothic_key in self.cells:
+                    self.cells[gothic_key].set_text(GOTHIC_NUMERALS[c])
+                if imperial_key in self.cells:
+                    self.cells[imperial_key].set_text(IMPERIAL_NUMERALS[c])
+
+    def pick_color_action(self, section, row):
+        color = askcolor(title="Pick a Color")
+        # color is a tuple: ( (R,G,B), "#rrggbb" )
+        if not color or not color[1] or not isinstance(color[1], str):
+            return  # user cancelled or invalid
+
+        hex_color = color[1]
+
+        apply_all = messagebox.askyesno("Apply to All?", "Apply color to all rows in this section?")
+        rows = range(5) if apply_all else [row]
+
+        for r in rows:
+            for c in range(10):
+                key = (section, r, c)
+                if key in self.cells:
+                    cell = self.cells[key]
+                    if isinstance(cell.content, str):
+                        cell.canvas.delete("all")
+                        x = (CELL_SIZE - 6) // 2
+                        y = (CELL_SIZE - 6) // 2
+                        cell.canvas.create_text(
+                            x, y,
+                            text=cell.content,
+                            font=cell.font,
+                            fill=hex_color,
+                            anchor="center"
+                        )
+
+    def reset_row_color(self, section, row):
+        default_color = LIGHT_TEXT
+        for c in range(10):
+            key = (section, row, c)
+            if key in self.cells:
+                cell = self.cells[key]
+                if isinstance(cell.content, str):
+                    cell.canvas.delete("all")
+                    x = (CELL_SIZE - 6) // 2
+                    y = (CELL_SIZE - 6) // 2
+                    cell.canvas.create_text(
+                        x, y,
+                        text=cell.content,
+                        font=cell.font,
+                        fill=default_color,
+                        anchor="center"
+                    )
+
+    def save_layout(self):
+        from tkinter import filedialog
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON Files", "*.json")],
+            title="Save Layout As..."
+        )
+        if not filepath:
+            return
+
+        layout = {}
+        for key, cell in self.cells.items():
+            section, row, col = key
+            if isinstance(cell.content, str):
+                layout[str(key)] = {"type": "text", "text": cell.content, "font": cell.font}
+            else:
+                layout[str(key)] = {"type": "icon"}
+
+        with open(filepath, "w") as f:
+            json.dump(layout, f, indent=4)
+        print(f"[INFO] Layout saved to {filepath}")
+
+    def load_layout(self):
+        from tkinter import filedialog
+        filepath = filedialog.askopenfilename(
+            defaultextension=".json",
+            filetypes=[("JSON Files", "*.json")],
+            title="Load Layout"
+        )
+        if not filepath:
+            return
+
+        with open(filepath, "r") as f:
+            layout = json.load(f)
+
+        for key_str, info in layout.items():
+            key = eval(key_str)  # turn "(section, row, col)" string back into tuple
+            if key in self.cells:
+                cell = self.cells[key]
+                if info["type"] == "text":
+                    cell.set_text(info["text"], font=info.get("font", ("Arial", 12)))
+                # if icons, you could later reload assigned images here
+
+    def print_layout(self):
+        print("[INFO] Print command clicked (printing to be implemented later)")
+
+    def quit(self):
+        self.destroy()
 
 class IconPickerDialog(tk.Toplevel):
     def __init__(self, master, section, row):
@@ -202,6 +502,10 @@ class IconPickerDialog(tk.Toplevel):
                                     bg=MID_BG, fg=LIGHT_TEXT, activebackground="#555555", relief="flat", highlightbackground=DARK_BG)
         self.set_button.pack(side="right", padx=10)
 
+        self.apply_all_button = tk.Button(self.button_frame, text="Apply to All", command=self.apply_icon_to_all,
+                                  bg=MID_BG, fg=LIGHT_TEXT, relief="flat")
+        self.apply_all_button.pack(side="right", padx=5)
+
         self.load_icons()
 
     def load_icons(self):
@@ -241,6 +545,17 @@ class IconPickerDialog(tk.Toplevel):
             key = (self.section, self.row, c)
             if key in self.master.cells:
                 self.master.cells[key].set_icon(self.selected_image)
+        self.destroy()
+    
+    def apply_icon_to_all(self):
+        if not self.selected_image:
+            return
+
+        for r in range(5):
+            for c in range(10):
+                key = (self.section, r, c)
+                if key in self.master.cells:
+                    self.master.cells[key].set_icon(self.selected_image)
         self.destroy()
 
 if __name__ == "__main__":
