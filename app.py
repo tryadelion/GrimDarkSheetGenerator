@@ -1,14 +1,20 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from icon_parsing import load_icon_entries
+from tkinter import messagebox, ttk
 from tkcolorpicker import askcolor
 from PIL import Image, ImageTk, ImageFont
 import tkinter.font as tkfont
 import os, ctypes
+import io
+import cairosvg
 import json
+
+with open("tag_color_mapping.json", "r") as f:
+    TAG_COLOR_MAP = json.load(f)
 
 # Basic Config
 APP_WIDTH = 1200
-APP_HEIGHT = 900
+APP_HEIGHT = 930
 CELL_SIZE = 48
 
 ICON_FOLDER = "icons"
@@ -24,6 +30,25 @@ LIGHT_TEXT = "#eeeeee"
 GOTHIC_NUMERALS = [str(i) for i in range(1, 11)]
 IMPERIAL_NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
 
+def load_svg_as_photoimage(svg_path, size=(60, 60), tint="#FFFFFF"):
+    try:
+        # Render the SVG to PNG bytes
+        png_data = cairosvg.svg2png(url=svg_path, output_width=size[0], output_height=size[1])
+        image = Image.open(io.BytesIO(png_data)).convert("RGBA")
+        image.thumbnail(size, Image.LANCZOS)
+
+        # Create solid fill image
+        solid = Image.new("RGBA", image.size, tint)
+
+        # Mask the non-transparent pixels
+        alpha = image.getchannel("A")
+        tinted = Image.composite(solid, Image.new("RGBA", image.size, (0, 0, 0, 0)), mask=alpha)
+
+        return ImageTk.PhotoImage(tinted)
+    except Exception as e:
+        print(f"[ERROR] Failed to tint SVG {svg_path}: {e}")
+        return None
+
 class IconCell(tk.Frame):
     def __init__(self, master, row, col, *args, **kwargs):
         super().__init__(master, width=CELL_SIZE, height=CELL_SIZE, bg=DARK_BG, *args, **kwargs)
@@ -31,6 +56,7 @@ class IconCell(tk.Frame):
         self.row = row
         self.col = col
         self.content = None
+        self.icon_path = None
         self.font = ("Arial", 12, "bold")
 
         self.inner_frame = tk.Frame(self, bg=MID_BG)
@@ -40,17 +66,19 @@ class IconCell(tk.Frame):
                                 highlightthickness=0, bg=MID_BG)
         self.canvas.place(x=3, y=3)
 
-    def set_icon(self, image):
+    def set_icon(self, image, path=None):
         self.content = image
+        self.icon_path = path
         self.inner_frame.configure(bg=DARK_BG)
         self.canvas.configure(bg=DARK_BG)
         self.canvas.delete("all")
         img = image
-        if image.width() > CELL_SIZE-6 or image.height() > CELL_SIZE-6:
-            factor = max(image.width()/(CELL_SIZE-6), image.height()/(CELL_SIZE-6))
-            img = image._PhotoImage__photo.subsample(int(factor))
-        self.canvas.create_image((CELL_SIZE-6)//2, (CELL_SIZE-6)//2,
-                                 image=img, anchor="center")
+        self.canvas.create_image(
+                (CELL_SIZE - 6) // 2,
+                (CELL_SIZE - 6) // 2,
+                image=image,
+                anchor="center"
+            )
         self.canvas.image = img
 
     def set_text(self, text, font=None):
@@ -246,33 +274,137 @@ class Tooltip:
 class IconGridApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Icon Grid Editor")
+        self.title("Astartes Decal Customizator")
         self.geometry(f"{APP_WIDTH}x{APP_HEIGHT}")
         self.configure(bg=DARK_BG)
+        self.overrideredirect(True)  # Remove OS title bar
 
-        menubar = tk.Menu(self)
-        file_menu = tk.Menu(menubar, tearoff=0)
+        # ── Title Bar ────────────────────────────
+        self.titlebar = tk.Frame(self, bg="#121212", height=32)
+        self.titlebar.pack(fill="x", side="top")
 
-        file_menu.add_command(label="Load Layout", command=self.load_layout)
-        file_menu.add_command(label="Save Layout", command=self.save_layout)
-        file_menu.add_separator()
-        file_menu.add_command(label="Print", command=self.print_layout)
-        file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.quit)
+        self.titlebar.bind("<Button-1>", self.start_move)
+        self.titlebar.bind("<B1-Motion>", self.do_move)
 
-        menubar.add_cascade(label="File", menu=file_menu)
-        self.config(menu=menubar)
+        title_label = tk.Label(self.titlebar, text="Astartes Decal Customizator",
+                            bg="#111111", fg="white", font=("Arial", 14, "bold"))
+        title_label.pack(side="left", padx=10)
+        title_label.bind("<Button-1>", self.start_move)
+        title_label.bind("<B1-Motion>", self.do_move)
 
+        # Titlebar buttons
+        btn_close = tk.Button(self.titlebar, text="✕", bg="#222", fg="white", command=self.quit,
+                            relief="flat", bd=0, width=3, height=1)
+        btn_close.pack(side="right", padx=2, pady=2)
+
+        btn_max = tk.Button(self.titlebar, text="🗖", bg="#222", fg="white", command=self.toggle_maximize,
+                            relief="flat", bd=0, width=3, height=1)
+        btn_max.pack(side="right", padx=2, pady=2)
+
+        btn_min = tk.Button(self.titlebar, text="━", bg="#222", fg="white", command=self.iconify,
+                            relief="flat", bd=0, width=3, height=1)
+        btn_min.pack(side="right", padx=2, pady=2)
+
+        # ── Toolbar (Menu Bar) ────────────────────────────
+        self.toolbar = tk.Frame(self, bg="#111111", height=30)
+        self.toolbar.pack(fill="x", side="top")
+
+        self.file_button = tk.Button(
+            self.toolbar, text="File", bg="#111111", fg="white",
+            font=("Arial", 12), relief="flat", bd=0,
+            activebackground="#333333", activeforeground="white",
+            command=self.toggle_file_menu
+        )
+        self.file_button.pack(side="left", padx=5)
+
+        self.file_menu_frame = tk.Frame(self, bg="#222222", bd=1, relief="solid")
+        self.file_menu_visible = False
+
+        # File Menu Dropdown
+        self.create_file_menu()
+
+        # Main UI below the toolbars
         self.cells = {}
-        mf = tk.Frame(self, bg=DARK_BG)
-        mf.pack(fill='both', expand=True)
-        mf.grid_rowconfigure(0,weight=1); mf.grid_rowconfigure(1,weight=1)
-        mf.grid_columnconfigure(0,weight=1); mf.grid_columnconfigure(1,weight=1)
-        self.create_section(mf, "Left Shoulder Pad",0,0)
-        self.create_section(mf, "Right Shoulder Pad",0,1)
-        self.create_section(mf, "Gothic Numerals",1,0)
-        self.create_section(mf, "Imperial Numerals",1,1)
+        self.sel_cell = None
+        self._maximized = False
+
+        self.main_frame = tk.Frame(self, bg=DARK_BG)
+        self.main_frame.pack(fill="both", expand=True)
+
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_rowconfigure(1, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(1, weight=1)
+
+        self.create_section(self.main_frame, "Left Shoulder Pad", 0, 0)
+        self.create_section(self.main_frame, "Right Shoulder Pad", 0, 1)
+        self.create_section(self.main_frame, "Gothic Numerals", 1, 0)
+        self.create_section(self.main_frame, "Imperial Numerals", 1, 1)
+
         self.prefill_numerals()
+
+
+    def start_move(self, event):
+        self.x = event.x
+        self.y = event.y
+
+    def do_move(self, event):
+        x = event.x_root - self.x
+        y = event.y_root - self.y
+        self.geometry(f"+{x}+{y}")
+
+    def create_file_menu(self):
+        def bind_hover(btn):
+            btn.bind("<Enter>", self.on_menu_hover)
+            btn.bind("<Leave>", self.on_menu_leave)
+
+        btns = [
+            ("Load Layout", self.load_layout),
+            ("Save Layout", self.save_layout),
+            ("Print", self.print_layout),
+            ("Exit", self.quit),
+            ("About", self.open_about)
+        ]
+        for text, cmd in btns:
+            btn = tk.Button(self.file_menu_frame, text=text, bg="#222222", fg="white",
+                            anchor="w", relief="flat", command=cmd, font=("Arial", 12))
+            btn.pack(fill="x", padx=5, pady=2)
+            bind_hover(btn)
+
+    def toggle_file_menu(self):
+        if self.file_menu_visible:
+            self.file_menu_frame.place_forget()
+            self.file_menu_visible = False
+        else:
+            def show_menu():
+                x = self.file_button.winfo_rootx() - self.winfo_rootx()
+                y = self.titlebar.winfo_height() + self.toolbar.winfo_height()
+                self.file_menu_frame.place(x=x, y=y)
+                self.file_menu_frame.lift()
+                self.file_menu_frame.focus_set()  # Make it focusable
+                self.file_menu_frame.bind("<FocusOut>", lambda e: self.hide_file_menu())
+                self.file_menu_frame.bind("<Escape>", lambda e: self.hide_file_menu())
+                self.file_menu_visible = True
+
+            self.after(10, show_menu)
+
+    def on_menu_hover(self, event):
+        event.widget.configure(bg="#333333")
+
+    def on_menu_leave(self, event):
+        event.widget.configure(bg="#222222")
+
+    def hide_file_menu(self):
+        self.file_menu_frame.place_forget()
+        self.file_menu_visible = False
+
+    def toggle_maximize(self):
+        if self._maximized:
+            self.geometry(f"{APP_WIDTH}x{APP_HEIGHT}")
+            self._maximized = False
+        else:
+            self.geometry(f"{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0")
+            self._maximized = True
 
     def create_section(self, parent, title, r, c):
         f = tk.Frame(parent, bg=DARK_BG)
@@ -357,8 +489,28 @@ class IconGridApp(tk.Tk):
                 if imperial_key in self.cells:
                     self.cells[imperial_key].set_text(IMPERIAL_NUMERALS[c])
 
+    def get_current_color(self, section, row):
+        # Returns the current fill color of the first text cell in a row, or None.
+        for c in range(10):
+            key = (section, row, c)
+            if key in self.cells:
+                cell = self.cells[key]
+                if isinstance(cell.content, str):
+                    items = cell.canvas.find_all()
+                    if items:
+                        color = cell.canvas.itemcget(items[0], "fill")
+                        if color:
+                            return color
+                    break
+        return None
+
     def pick_color_action(self, section, row):
-        color = askcolor(title="Pick a Color")
+        current_color = self.get_current_color(section, row)
+        color = askcolor(
+            title="Pick a Color",
+            color= current_color if current_color != None else "#FFFFFF",
+            alpha=False
+        )
         # color is a tuple: ( (R,G,B), "#rrggbb" )
         if not color or not color[1] or not isinstance(color[1], str):
             return  # user cancelled or invalid
@@ -374,6 +526,7 @@ class IconGridApp(tk.Tk):
                 if key in self.cells:
                     cell = self.cells[key]
                     if isinstance(cell.content, str):
+                         # This is a text cell
                         cell.canvas.delete("all")
                         x = (CELL_SIZE - 6) // 2
                         y = (CELL_SIZE - 6) // 2
@@ -384,6 +537,14 @@ class IconGridApp(tk.Tk):
                             fill=hex_color,
                             anchor="center"
                         )
+                    elif getattr(cell, "icon_path", None):
+                        # This is an icon cell with a path
+                        tinted_img = load_svg_as_photoimage(
+                            cell.icon_path,
+                            size=(CELL_SIZE - 6, CELL_SIZE - 6),
+                            tint=hex_color
+                        )
+                        cell.set_icon(tinted_img, path=cell.icon_path)
 
     def reset_row_color(self, section, row):
         default_color = LIGHT_TEXT
@@ -449,6 +610,63 @@ class IconGridApp(tk.Tk):
     def print_layout(self):
         print("[INFO] Print command clicked (printing to be implemented later)")
 
+    def open_about(self):
+        about_win = tk.Toplevel(self)
+        about_win.title("About Astartes Decal Customizator")
+        about_win.configure(bg="#222222")
+        about_win.geometry("600x600")
+        about_win.resizable(False, False)
+
+        try:
+            font_path = os.path.join(FONT_FOLDER, "CaslonAntique.ttf")
+            import ctypes
+            FR_PRIVATE = 0x10
+            if os.name == 'nt':
+                ctypes.windll.gdi32.AddFontResourceExW(font_path, FR_PRIVATE, 0)
+            from PIL import ImageFont
+            pil_font = ImageFont.truetype(font_path, size=14)
+            family = pil_font.getname()[0]
+            text_font = (family, 18)
+        except Exception:
+            text_font = ("Times New Roman", 12)
+
+        try:
+            from PIL import Image, ImageTk
+            logo_path = os.path.join(ICON_FOLDER, "chapter_logo.png")
+            raw_logo = Image.open(logo_path).convert("RGBA")
+            raw_logo.thumbnail((100, 100))
+            alpha = raw_logo.split()[3].point(lambda p: p * 0.2)
+            raw_logo.putalpha(alpha)
+            logo_img = ImageTk.PhotoImage(raw_logo)
+            logo_label = tk.Label(about_win, image=logo_img, bg="#222222")
+            logo_label.image = logo_img
+            logo_label.pack(pady=(10, 0))
+        except Exception as e:
+            print(f"[WARN] Could not load logo: {e}")
+
+        text = (
+            "Astartes Decal Customizator\n\n"
+            "This tool was developed by Eric Cugota (GitHub: tryadelion)\n"
+            "with inspiration and resources from the Bolter and Chainsword community.\n\n"
+            "Includes work from:\n"
+            "- Caliban Angelus Font (creator unknown)\n"
+            "- Caslon Antique Font (Berne Nadall, 1894)\n"
+            "- Grimworld 40K's icon library by Bishop Greisyn and Abomination\n"
+            "- And moral support from my cat Morgana 🐾\n\n"
+            "Published under the MIT License.\n"
+            "No ownership is claimed over included resources.\n"
+            "No affiliation with Games Workshop.\n\n"
+            "Repository link pending. Contributions and feedback welcome!"
+        )
+
+        label = tk.Label(about_win, text=text, bg="#222222", fg="white",
+                        font=text_font, justify="left", wraplength=560, anchor="n")
+        label.pack(padx=20, pady=20)
+
+        close_btn = tk.Button(about_win, text="Close", command=about_win.destroy,
+                            bg=MID_BG, fg="white", relief="flat")
+        close_btn.pack(pady=10)
+
     def quit(self):
         self.destroy()
 
@@ -463,100 +681,163 @@ class IconPickerDialog(tk.Toplevel):
         self.row = row
         self.selected_image = None
         self.selected_path = None
+        self.selected_frame = None
         self.icon_images = []
 
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=0)
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure("Vertical.TScrollbar", gripcount=0, background="#333", darkcolor="#222", lightcolor="#444",
+                        troughcolor="#111", bordercolor="#222", arrowcolor="white")
 
         container = tk.Frame(self, bg=DARK_BG)
-        container.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        container.pack(fill="both", expand=True, padx=10, pady=10)
 
         self.scroll_canvas = tk.Canvas(container, bg=DARK_BG, highlightthickness=0)
         self.scroll_canvas.pack(side="left", fill="both", expand=True)
 
-        scrollbar = tk.Scrollbar(container, orient="vertical", command=self.scroll_canvas.yview)
+        scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.scroll_canvas.yview, style="Vertical.TScrollbar")
         scrollbar.pack(side="right", fill="y")
+        self.scroll_canvas.configure(yscrollcommand=scrollbar.set)
 
         self.icon_frame = tk.Frame(self.scroll_canvas, bg=DARK_BG)
-        self.scroll_canvas.create_window((0, 0), window=self.icon_frame, anchor="nw")
-        self.scroll_canvas.configure(yscrollcommand=scrollbar.set)
+        self.scroll_window = self.scroll_canvas.create_window((0, 0), window=self.icon_frame, anchor="nw")
+        def resize_canvas(event):
+            canvas_width = event.width
+            self.scroll_canvas.itemconfig(self.scroll_window, width=canvas_width)
+
+        self.scroll_canvas.bind("<Configure>", resize_canvas)
 
         self.icon_frame.bind("<Configure>", lambda e: self.scroll_canvas.configure(scrollregion=self.scroll_canvas.bbox("all")))
 
-        self.preview_frame = tk.Frame(self, bg=MID_BG)
-        self.preview_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
-
-        self.preview_label = tk.Label(self.preview_frame, text="No Icon Selected", bg=MID_BG, fg=LIGHT_TEXT)
-        self.preview_label.pack(expand=True, fill="both")
-
         self.button_frame = tk.Frame(self, bg=DARK_BG)
-        self.button_frame.grid(row=1, column=0, columnspan=2, pady=10)
+        self.button_frame.pack(pady=10)
 
         self.cancel_button = tk.Button(self.button_frame, text="Cancel", command=self.destroy,
-                                       bg=MID_BG, fg=LIGHT_TEXT, activebackground="#555555", relief="flat", highlightbackground=DARK_BG)
+                                       bg=MID_BG, fg=LIGHT_TEXT, activebackground="#555555", relief="flat")
         self.cancel_button.pack(side="left", padx=10)
 
         self.set_button = tk.Button(self.button_frame, text="Set Icon", command=self.apply_icon,
-                                    bg=MID_BG, fg=LIGHT_TEXT, activebackground="#555555", relief="flat", highlightbackground=DARK_BG)
+                                    bg=MID_BG, fg=LIGHT_TEXT, activebackground="#555555", relief="flat")
         self.set_button.pack(side="right", padx=10)
 
         self.apply_all_button = tk.Button(self.button_frame, text="Apply to All", command=self.apply_icon_to_all,
-                                  bg=MID_BG, fg=LIGHT_TEXT, relief="flat")
+                                          bg=MID_BG, fg=LIGHT_TEXT, activebackground="#555555", relief="flat")
         self.apply_all_button.pack(side="right", padx=5)
 
-        self.load_icons()
+        self.entries = load_icon_entries(ICON_FOLDER)
+        self.entries.sort(key=lambda e: (not e.tags, e.tags, e.name.lower()))
+        self.draw_icons()
+        self.bind_mousewheel(self.scroll_canvas)
 
-    def load_icons(self):
-        files = [f for f in os.listdir(ICON_FOLDER) if f.lower().endswith((".png", ".gif"))]
-        for idx, filename in enumerate(files):
-            path = os.path.join(ICON_FOLDER, filename)
-            try:
-                img = Image.open(path)
-                img.thumbnail((60, 60))
-                tk_img = ImageTk.PhotoImage(img)
-                self.icon_images.append(tk_img)
-                row, col = divmod(idx, 5)
-                btn = tk.Button(self.icon_frame, image=tk_img, text="", command=lambda p=path: self.select_icon(p),
-                                bg=DARK_BG, bd=0, relief="flat", highlightthickness=0)
-                btn.grid(row=row, column=col, padx=5, pady=5)
-            except Exception as e:
-                print(f"[ERROR] Failed to load {filename}: {e}")
-        self.scroll_canvas.update_idletasks()
+    def bind_mousewheel(self, widget):
+        # Windows and Linux
+        widget.bind_all("<MouseWheel>", self._on_mousewheel)
+        # macOS
+        widget.bind_all("<Button-4>", self._on_mousewheel_mac)
+        widget.bind_all("<Button-5>", self._on_mousewheel_mac)
 
-    def select_icon(self, path):
+    def _on_mousewheel(self, event):
+        self.scroll_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    def _on_mousewheel_mac(self, event):
+        if event.num == 4:
+            self.scroll_canvas.yview_scroll(-1, "units")
+        elif event.num == 5:
+            self.scroll_canvas.yview_scroll(1, "units")
+
+    def draw_icons(self):
+        for idx, entry in enumerate(self.entries):
+            img = load_svg_as_photoimage(entry.filepath, tint="#FFFFFF")
+            if img:
+                self.icon_images.append(img)
+
+                frame = tk.Frame(self.icon_frame, bg=MID_BG, highlightbackground="#444", highlightthickness=1)
+                frame.pack(fill="x", padx=4, pady=3)
+                def bind_clicks_to_frame(f, path):
+                    def click_handler(event):
+                        self.select_icon(path, f)
+                    f.bind("<Button-1>", click_handler)
+                    for child in f.winfo_children():
+                        child.bind("<Button-1>", click_handler)
+
+                frame.bind("<Enter>", lambda e, f=frame: f.configure(bg="#444444"))
+                frame.bind("<Leave>", lambda e, f=frame: self.update_card_bg(f))
+                frame.grid_columnconfigure(1, weight=1)
+
+                icon_label = tk.Label(frame, image=img, bg=MID_BG)
+                icon_label.grid(row=0, column=0, rowspan=2, padx=5, pady=5)
+                
+                title_label = tk.Label(frame, text=entry.name, fg=LIGHT_TEXT, bg=MID_BG,
+                                       font=("Arial", 10, "bold"), anchor="w", justify="left")
+                title_label.grid(row=0, column=1, sticky="w")
+        
+
+                tag_frame = tk.Frame(frame, bg=MID_BG)
+                tag_frame.grid(row=1, column=1, sticky="w")
+                self.render_tag_pills(tag_frame, entry.tags)
+                bind_clicks_to_frame(frame, entry.filepath)
+
+    def render_tag_pills(self, parent, tags):
+        for tag in tags:
+            bg, fg = TAG_COLOR_MAP.get(tag, ("#444444", "#FFFFFF"))
+            pill = tk.Label(
+                parent,
+                text=tag,
+                bg=bg,
+                fg=fg,
+                font=("Arial", 9, "bold"),
+                padx=6,
+                pady=2,
+                borderwidth=1,
+                relief="solid"
+            )
+            pill.pack(side="left", padx=(0, 5), pady=2)
+
+    def update_card_bg(self, frame):
+        if frame != self.selected_frame:
+            frame.configure(bg=MID_BG)
+
+    def select_icon(self, path, frame):
         self.selected_path = path
-        img = Image.open(path)
-
-        preview_width = self.preview_frame.winfo_width() or 300
-        preview_height = self.preview_frame.winfo_height() or 400
-
-        img.thumbnail((preview_width, preview_height))
-        self.selected_image = ImageTk.PhotoImage(img)
-
-        self.preview_label.configure(image=self.selected_image, text="")
-        self.preview_label.image = self.selected_image
+        self.selected_image = load_svg_as_photoimage(path, size=(60, 60), tint="#FFFFFF")
+        if self.selected_frame:
+            self.selected_frame.configure(bg=MID_BG)
+        self.selected_frame = frame
+        frame.configure(bg=DEFAULT_HIGHLIGHT_COLOR)
 
     def apply_icon(self):
-        if not self.selected_image:
+        if not self.selected_path:
             return
+
         for c in range(10):
             key = (self.section, self.row, c)
             if key in self.master.cells:
-                self.master.cells[key].set_icon(self.selected_image)
+                cell = self.master.cells[key]
+                tinted_img = load_svg_as_photoimage(
+                    self.selected_path,
+                    size=(CELL_SIZE - 6, CELL_SIZE - 6),
+                    tint="#FFFFFF"
+                )
+                cell.set_icon(tinted_img, path=self.selected_path)
         self.destroy()
-    
+
     def apply_icon_to_all(self):
-        if not self.selected_image:
+        if not self.selected_path:
             return
 
         for r in range(5):
             for c in range(10):
                 key = (self.section, r, c)
                 if key in self.master.cells:
-                    self.master.cells[key].set_icon(self.selected_image)
+                    cell = self.master.cells[key]
+                    tinted_img = load_svg_as_photoimage(
+                        self.selected_path,
+                        size=(CELL_SIZE - 6, CELL_SIZE - 6),
+                        tint="#FFFFFF"
+                    )
+                    cell.set_icon(tinted_img, path=self.selected_path)
         self.destroy()
+
 
 if __name__ == "__main__":
     app = IconGridApp()

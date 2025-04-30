@@ -1,0 +1,1202 @@
+{
+    "('Left Shoulder Pad', 0, 0)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 0, 1)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 0, 2)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 0, 3)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 0, 4)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 0, 5)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 0, 6)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 0, 7)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 0, 8)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 0, 9)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 0)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 1)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 2)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 3)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 4)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 5)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 6)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 7)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 8)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 1, 9)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 0)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 1)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 2)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 3)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 4)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 5)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 6)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 7)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 8)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 2, 9)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 0)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 1)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 2)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 3)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 4)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 5)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 6)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 7)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 8)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 3, 9)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 0)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 1)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 2)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 3)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 4)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 5)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 6)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 7)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 8)": {
+        "type": "icon"
+    },
+    "('Left Shoulder Pad', 4, 9)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 0)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 1)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 2)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 3)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 4)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 5)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 6)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 7)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 8)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 0, 9)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 0)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 1)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 2)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 3)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 4)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 5)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 6)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 7)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 8)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 1, 9)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 0)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 1)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 2)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 3)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 4)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 5)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 6)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 7)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 8)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 2, 9)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 0)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 1)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 2)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 3)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 4)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 5)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 6)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 7)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 8)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 3, 9)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 0)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 1)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 2)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 3)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 4)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 5)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 6)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 7)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 8)": {
+        "type": "icon"
+    },
+    "('Right Shoulder Pad', 4, 9)": {
+        "type": "icon"
+    },
+    "('Gothic Numerals', 0, 0)": {
+        "type": "text",
+        "text": "1",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 0, 1)": {
+        "type": "text",
+        "text": "2",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 0, 2)": {
+        "type": "text",
+        "text": "3",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 0, 3)": {
+        "type": "text",
+        "text": "4",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 0, 4)": {
+        "type": "text",
+        "text": "5",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 0, 5)": {
+        "type": "text",
+        "text": "6",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 0, 6)": {
+        "type": "text",
+        "text": "7",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 0, 7)": {
+        "type": "text",
+        "text": "8",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 0, 8)": {
+        "type": "text",
+        "text": "9",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 0, 9)": {
+        "type": "text",
+        "text": "10",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 0)": {
+        "type": "text",
+        "text": "1",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 1)": {
+        "type": "text",
+        "text": "2",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 2)": {
+        "type": "text",
+        "text": "3",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 3)": {
+        "type": "text",
+        "text": "4",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 4)": {
+        "type": "text",
+        "text": "5",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 5)": {
+        "type": "text",
+        "text": "6",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 6)": {
+        "type": "text",
+        "text": "7",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 7)": {
+        "type": "text",
+        "text": "8",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 8)": {
+        "type": "text",
+        "text": "9",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 1, 9)": {
+        "type": "text",
+        "text": "10",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 0)": {
+        "type": "text",
+        "text": "1",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 1)": {
+        "type": "text",
+        "text": "2",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 2)": {
+        "type": "text",
+        "text": "3",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 3)": {
+        "type": "text",
+        "text": "4",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 4)": {
+        "type": "text",
+        "text": "5",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 5)": {
+        "type": "text",
+        "text": "6",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 6)": {
+        "type": "text",
+        "text": "7",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 7)": {
+        "type": "text",
+        "text": "8",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 8)": {
+        "type": "text",
+        "text": "9",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 2, 9)": {
+        "type": "text",
+        "text": "10",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 0)": {
+        "type": "text",
+        "text": "1",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 1)": {
+        "type": "text",
+        "text": "2",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 2)": {
+        "type": "text",
+        "text": "3",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 3)": {
+        "type": "text",
+        "text": "4",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 4)": {
+        "type": "text",
+        "text": "5",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 5)": {
+        "type": "text",
+        "text": "6",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 6)": {
+        "type": "text",
+        "text": "7",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 7)": {
+        "type": "text",
+        "text": "8",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 8)": {
+        "type": "text",
+        "text": "9",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 3, 9)": {
+        "type": "text",
+        "text": "10",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 0)": {
+        "type": "text",
+        "text": "1",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 1)": {
+        "type": "text",
+        "text": "2",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 2)": {
+        "type": "text",
+        "text": "3",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 3)": {
+        "type": "text",
+        "text": "4",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 4)": {
+        "type": "text",
+        "text": "5",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 5)": {
+        "type": "text",
+        "text": "6",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 6)": {
+        "type": "text",
+        "text": "7",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 7)": {
+        "type": "text",
+        "text": "8",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 8)": {
+        "type": "text",
+        "text": "9",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Gothic Numerals', 4, 9)": {
+        "type": "text",
+        "text": "10",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 0)": {
+        "type": "text",
+        "text": "I",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 1)": {
+        "type": "text",
+        "text": "II",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 2)": {
+        "type": "text",
+        "text": "III",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 3)": {
+        "type": "text",
+        "text": "IV",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 4)": {
+        "type": "text",
+        "text": "V",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 5)": {
+        "type": "text",
+        "text": "VI",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 6)": {
+        "type": "text",
+        "text": "VII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 7)": {
+        "type": "text",
+        "text": "VIII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 8)": {
+        "type": "text",
+        "text": "IX",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 0, 9)": {
+        "type": "text",
+        "text": "X",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 0)": {
+        "type": "text",
+        "text": "I",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 1)": {
+        "type": "text",
+        "text": "II",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 2)": {
+        "type": "text",
+        "text": "III",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 3)": {
+        "type": "text",
+        "text": "IV",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 4)": {
+        "type": "text",
+        "text": "V",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 5)": {
+        "type": "text",
+        "text": "VI",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 6)": {
+        "type": "text",
+        "text": "VII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 7)": {
+        "type": "text",
+        "text": "VIII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 8)": {
+        "type": "text",
+        "text": "IX",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 1, 9)": {
+        "type": "text",
+        "text": "X",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 0)": {
+        "type": "text",
+        "text": "I",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 1)": {
+        "type": "text",
+        "text": "II",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 2)": {
+        "type": "text",
+        "text": "III",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 3)": {
+        "type": "text",
+        "text": "IV",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 4)": {
+        "type": "text",
+        "text": "V",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 5)": {
+        "type": "text",
+        "text": "VI",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 6)": {
+        "type": "text",
+        "text": "VII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 7)": {
+        "type": "text",
+        "text": "VIII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 8)": {
+        "type": "text",
+        "text": "IX",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 2, 9)": {
+        "type": "text",
+        "text": "X",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 0)": {
+        "type": "text",
+        "text": "I",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 1)": {
+        "type": "text",
+        "text": "II",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 2)": {
+        "type": "text",
+        "text": "III",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 3)": {
+        "type": "text",
+        "text": "IV",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 4)": {
+        "type": "text",
+        "text": "V",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 5)": {
+        "type": "text",
+        "text": "VI",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 6)": {
+        "type": "text",
+        "text": "VII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 7)": {
+        "type": "text",
+        "text": "VIII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 8)": {
+        "type": "text",
+        "text": "IX",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 3, 9)": {
+        "type": "text",
+        "text": "X",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 0)": {
+        "type": "text",
+        "text": "I",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 1)": {
+        "type": "text",
+        "text": "II",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 2)": {
+        "type": "text",
+        "text": "III",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 3)": {
+        "type": "text",
+        "text": "IV",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 4)": {
+        "type": "text",
+        "text": "V",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 5)": {
+        "type": "text",
+        "text": "VI",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 6)": {
+        "type": "text",
+        "text": "VII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 7)": {
+        "type": "text",
+        "text": "VIII",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 8)": {
+        "type": "text",
+        "text": "IX",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    },
+    "('Imperial Numerals', 4, 9)": {
+        "type": "text",
+        "text": "X",
+        "font": [
+            "Arial",
+            12,
+            "bold"
+        ]
+    }
+}
