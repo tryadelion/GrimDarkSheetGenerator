@@ -4,6 +4,7 @@ from typing import List, Tuple
 from PIL import Image, ImageTk
 import cairosvg
 import io
+ICON_THUMBNAIL_CACHE = {}
 
 class IconEntry:
     def __init__(self, name: str, tags: List[str], filepath: str):
@@ -19,8 +20,11 @@ class IconEntry:
         return f"{self.name} – {', '.join(self.tags)}"
 
     def load_image(self, size=(60, 60)) -> ImageTk.PhotoImage:
+        key = (self.filepath, size)
         if self.thumbnail:
             return self.thumbnail
+        if key in ICON_THUMBNAIL_CACHE:
+            return ICON_THUMBNAIL_CACHE[key]
         try:
             with open(self.filepath, 'rb') as f:
                 svg_data = f.read()
@@ -28,6 +32,7 @@ class IconEntry:
             image = Image.open(io.BytesIO(png_data))
             image.thumbnail(size, Image.LANCZOS)
             self.thumbnail = ImageTk.PhotoImage(image)
+            ICON_THUMBNAIL_CACHE[key] = self.thumbnail
             return self.thumbnail
         except Exception as e:
             print(f"[ERROR] Failed to load icon {self.filepath}: {e}")
