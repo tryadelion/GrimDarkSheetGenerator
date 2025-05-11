@@ -10,7 +10,7 @@ class IconEntry:
     def __init__(self, name: str, tags: List[str], filepath: str):
         self.name = name
         self.tags = tags
-        self.filepath = filepath
+        self.file = filepath
         self.thumbnail = None  # to be loaded lazily
 
     def __lt__(self, other):
@@ -20,13 +20,13 @@ class IconEntry:
         return f"{self.name} – {', '.join(self.tags)}"
 
     def load_image(self, size=(60, 60)) -> ImageTk.PhotoImage:
-        key = (self.filepath, size)
+        key = (self.file, size)
         if self.thumbnail:
             return self.thumbnail
         if key in ICON_THUMBNAIL_CACHE:
             return ICON_THUMBNAIL_CACHE[key]
         try:
-            with open(self.filepath, 'rb') as f:
+            with open(self.file, 'rb') as f:
                 svg_data = f.read()
             png_data = cairosvg.svg2png(bytestring=svg_data, output_width=size[0], output_height=size[1])
             image = Image.open(io.BytesIO(png_data))
@@ -35,7 +35,7 @@ class IconEntry:
             ICON_THUMBNAIL_CACHE[key] = self.thumbnail
             return self.thumbnail
         except Exception as e:
-            print(f"[ERROR] Failed to load icon {self.filepath}: {e}")
+            print(f"[ERROR] Failed to load icon {self.file}: {e}")
             return None
 
 def parse_icon_filename(filename: str) -> Tuple[str, List[str]]:
